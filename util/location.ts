@@ -2,7 +2,6 @@ import axios from "axios";
 import HttpError from "../models/http-error";
 import "dotenv/config";
 
-const API_KEY = "AIzaSyCwMb_QL_Ri1xqivjiHXP8ELR61ZCF-AJ4";
 
 export default async function getCoordsFromAddress(address: any) {
   const response = await axios.get(
