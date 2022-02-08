@@ -1,6 +1,6 @@
-export default interface userObj {
+export default interface UserObj {
   id: string;
-  name: string;
-  image: string;
-  places: number;
+  username: string;
+  email: string;
+  password: string;
 }

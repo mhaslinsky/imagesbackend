@@ -1,5 +1,5 @@
 export default interface PostObj {
-  id: string;
+  id?: any;
   image: string;
   title: string;
   description: string;
