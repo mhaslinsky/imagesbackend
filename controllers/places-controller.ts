@@ -1,37 +1,50 @@
 import { Posts, overWriteData } from "../DUMMY_DATA";
 import HttpError from "../models/http-error";
-import PostObj from "../models/postObj";
-import { randomUUID } from "crypto";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
-import getcoordsfromaddress from "../util/location";
 import getCoordsFromAddress from "../util/location";
+import PostModel from "../models/postSchema";
 
-export function getPlaceById(req: Request, res: Response, next: NextFunction) {
-  const placeId = req.params.pid;
-  const filteredPosts = Posts.find((post) => {
-    return post.id === placeId;
-  });
+export async function getPlaceById(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const postId = req.params.pid;
+  let filteredPosts;
+  try {
+    filteredPosts = await PostModel.findById(postId);
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
 
   if (!filteredPosts) {
     const error: NodeJS.ErrnoException = new HttpError(
-      "Could not find a place for the provided id.",
+      "Could not find a post for the provided id.",
       "404"
     );
-    throw error;
+    return next(error);
   }
-  res.status(200).json(filteredPosts);
+  res.status(200).json(filteredPosts.toObject({ getters: true }));
 }
 
-export function getPlacesByUserId(
+export async function getPlacesByUserId(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const userId = req.params.uid;
-  const filteredPosts = Posts.filter((post) => {
-    return post.creatorId === userId;
-  });
+  let filteredPosts;
+  try {
+    filteredPosts = await PostModel.find({ creatorId: userId });
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+
   if (filteredPosts.length === 0) {
     const error: NodeJS.ErrnoException = new HttpError(
       "Could not find a place for the provided user id.",
@@ -59,17 +72,22 @@ export async function createPlace(
     return next(error);
   }
 
-  const createdPlace: PostObj = {
-    id: randomUUID(),
+  const createdPlace = new PostModel({
     title,
     description,
-    coordinates,
     address,
+    coordinates,
     creatorId,
-    image,
-  };
+    image:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1746&q=80",
+  });
 
-  Posts.unshift(createdPlace);
+  try {
+    await createdPlace.save();
+  } catch (err) {
+    return next(err);
+  }
+
   res.status(201).json(createdPlace);
 }
 

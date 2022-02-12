@@ -4,6 +4,8 @@ import bodyParser from "body-parser";
 import placesRouter from "./routes/places-routes";
 import HttpError from "./models/http-error";
 import userRouter from "./routes/users-routes";
+import mongoose from "mongoose";
+import "dotenv/config";
 
 const app = express();
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
@@ -33,4 +35,13 @@ app.use(
   }
 );
 
-app.listen(5000);
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.DB_CRED}:${process.env.DB_CRED}@cluster0.pku1z.mongodb.net/posts?retryWrites=true&w=majority`
+  )
+  .then(() => {
+    app.listen(5000);
+  })
+  .catch((error) => {
+    console.warn(error);
+  });

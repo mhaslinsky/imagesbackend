@@ -10,6 +10,7 @@ export default async function getCoordsFromAddress(address: any) {
   );
 
   const data = response.data;
+
   if (!data || data.status === "ZERO_RESULTS") {
     throw new HttpError(
       "Could not find coordinates for the specified address",
