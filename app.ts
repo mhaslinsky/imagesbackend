@@ -1,7 +1,7 @@
 import express from "express";
 import { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
-import placesRouter from "./routes/places-routes";
+import postsRouter from "./routes/posts-routes";
 import HttpError from "./models/http-error";
 import userRouter from "./routes/users-routes";
 import mongoose from "mongoose";
@@ -11,7 +11,7 @@ const app = express();
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
 app.use(bodyParser.json());
 
-app.use("/api/places", placesRouter);
+app.use("/api/places", postsRouter);
 app.use("/api/users", userRouter);
 
 //placing generic route here at bottom of table as a catchall
