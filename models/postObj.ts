@@ -1,4 +1,7 @@
-import { Types } from "mongoose";
+import { Types, HydratedDocument } from "mongoose";
+import UserObj from "./userObj";
+import PostModel from "./postSchema";
+import { model } from "mongoose";
 
 export default interface PostObj {
   id?: any;
@@ -7,5 +10,5 @@ export default interface PostObj {
   description: string;
   address: string;
   coordinates: { lat: number; lng: number };
-  creatorId: any;
+  creatorId: HydratedDocument<UserObj>;
 }

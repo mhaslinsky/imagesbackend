@@ -96,8 +96,7 @@ export async function createPost(
     await postSession.commitTransaction();
   } catch (err) {
     return next(
-      // new HttpError("A communication error occured, please try again.", "500")
-      err
+      new HttpError("A communication error occured, please try again.", "500")
     );
   }
 
