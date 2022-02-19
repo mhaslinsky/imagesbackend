@@ -1,64 +1,88 @@
-import { users } from "../DUMMY_USERS";
-import { randomUUID } from "crypto";
-import UserObj from "../models/userObj";
 import HttpError from "../models/http-error";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
+import UserModel from "../models/userSchema";
 
-export function getUsers(req: any, res: any, next: any) {
-  res.json({ users: users });
+export async function getUsers(req: any, res: any, next: any) {
+  let users;
+  try {
+    users = await UserModel.find({}, "-password");
+  } catch (err) {
+    return next(
+      new HttpError("Fetching users failed, please try again.", "500")
+    );
+  }
+  res.json(
+    users.map((u) => {
+      return u.toObject({ getters: true });
+    })
+  );
 }
 
-export function signUp(req: Request, res: Response, next: NextFunction) {
+export async function signUp(req: Request, res: Response, next: NextFunction) {
   const error = validationResult(req);
-  console.log(error);
   if (!error.isEmpty()) {
-    throw new HttpError(
-      "Invalid account creation credentials, please make sure email is valid and password is at least 6 characters",
-      "422"
+    return next(
+      new HttpError(
+        "Invalid account creation credentials, please make sure email is valid and password is at least 6 characters",
+        "422"
+      )
     );
   }
   const { username, email, password } = req.body;
-  const createdUser: UserObj = {
-    id: randomUUID(),
+  let existingUser;
+  try {
+    existingUser = await UserModel.findOne({ email: email });
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+
+  if (existingUser) {
+    return next(
+      new HttpError(
+        "A user already exists with that email, please try another email address",
+        "422"
+      )
+    );
+  }
+
+  const createdUser = new UserModel({
     username,
     email,
     password,
-  };
-  const alreadyExists = users.find((u) => {
-    return u.email === email;
+    image: "https://ibb.co/NNKrbQt",
+    places: [],
   });
-  if (alreadyExists) {
-    const error: NodeJS.ErrnoException = new HttpError(
-      "Could not create user, email already exists",
-      "422"
+
+  try {
+    await createdUser.save();
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
     );
-    throw error;
   }
-  users.push(createdUser);
-  res.status(201).json({ user: createdUser });
+  res.status(201).json(createdUser.toObject({ getters: true }));
 }
 
-export function login(req: Request, res: Response, next: NextFunction) {
+export async function login(req: Request, res: Response, next: NextFunction) {
   const { email, password } = req.body;
-  const idUser = users.find((u) => {
-    return u.email === email;
-  });
-  console.log(idUser);
 
-  if (!idUser) {
-    const error: NodeJS.ErrnoException = new HttpError(
-      "Could not find a user with that email",
-      "401"
+  let existingUser;
+  try {
+    existingUser = await UserModel.findOne({ email: email });
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
     );
-    throw error;
   }
-  if (idUser.password !== password) {
-    const error: NodeJS.ErrnoException = new HttpError(
-      "Incorrect Password",
-      "401"
-    );
-    throw error;
+
+  if (!existingUser) {
+    return next(new HttpError("Could not find a user with that email", "401"));
+  }
+  if (existingUser.password !== password) {
+    return next(new HttpError("Incorrect Password", "401"));
   } else {
     res.json({ message: "Logged In" });
   }

@@ -1,9 +1,10 @@
-import { Posts, overWriteData } from "../DUMMY_DATA";
 import HttpError from "../models/http-error";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import getCoordsFromAddress from "../util/location";
 import PostModel from "../models/postSchema";
+import UserModel from "../models/userSchema";
+import { startSession } from "mongoose";
 
 export async function getPostById(
   req: Request,
@@ -16,18 +17,11 @@ export async function getPostById(
     filteredPosts = await PostModel.findById(postId);
   } catch (err) {
     return next(
-      new HttpError("A communication error occured, please try again.", "500")
+      new HttpError("Could not find a post for the provided id.", "404")
     );
   }
 
-  if (!filteredPosts) {
-    const error: NodeJS.ErrnoException = new HttpError(
-      "Could not find a post for the provided id.",
-      "404"
-    );
-    return next(error);
-  }
-  res.status(200).json(filteredPosts.toObject({ getters: true }));
+  res.status(200).json(filteredPosts!.toObject({ getters: true }));
 }
 
 export async function getPostsByUserId(
@@ -68,7 +62,7 @@ export async function createPost(
   if (!error.isEmpty()) {
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
   }
-  const { title, description, creatorId, address, image } = req.body;
+  const { title, description, creatorId, address } = req.body;
   let coordinates;
   try {
     coordinates = await getCoordsFromAddress(address);
@@ -79,17 +73,32 @@ export async function createPost(
   const createdPlace = new PostModel({
     title,
     description,
+    creatorId,
     address,
     coordinates,
-    creatorId,
     image:
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1746&q=80",
   });
 
+  let user;
   try {
-    await createdPlace.save();
+    user = await UserModel.findById(creatorId);
   } catch (err) {
-    return next(err);
+    return next(new HttpError("Could not find user with provided ID", "404"));
+  }
+
+  try {
+    const postSession = await startSession();
+    postSession.startTransaction();
+    await createdPlace.save({ session: postSession });
+    user!.posts.push(createdPlace);
+    await user!.save({ session: postSession });
+    await postSession.commitTransaction();
+  } catch (err) {
+    return next(
+      // new HttpError("A communication error occured, please try again.", "500")
+      err
+    );
   }
 
   res.status(201).json(createdPlace);
@@ -157,13 +166,28 @@ export async function deletePost(
   let filteredPost;
 
   try {
-    filteredPost = PostModel.findById(postId);
+    //populate returns document from user collection of who created post nested in creatorId key
+    //this is possible due to the ref set in the postSchema
+    filteredPost = await PostModel.findById(postId).populate("creatorId");
   } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+  if (!filteredPost) {
     return next(new HttpError("Could not find a matching post ID.", "404"));
   }
-
   try {
-    await filteredPost.remove();
+    const deleteSession = await startSession();
+    deleteSession.startTransaction();
+    await filteredPost.remove({ session: deleteSession });
+    //this is where populate comes into play. it allows us to delete the post from the user collection
+    //in the same session without have to find it with a second search
+    filteredPost!.creatorId.posts.pull(filteredPost);
+    await filteredPost!.creatorId.save({
+      session: deleteSession,
+    });
+    await deleteSession.commitTransaction();
   } catch (err) {
     return next(
       new HttpError("A communication error occured, please try again.", "500")

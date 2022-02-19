@@ -10,7 +10,7 @@ const postSchema = new Schema<PostObj>({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
   },
-  creatorId: { type: String, required: true },
+  creatorId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
 });
 
 const PostModel = model<PostObj>("Post", postSchema);

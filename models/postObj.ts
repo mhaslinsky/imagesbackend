@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export default interface PostObj {
   id?: any;
   image: string;
@@ -5,5 +7,5 @@ export default interface PostObj {
   description: string;
   address: string;
   coordinates: { lat: number; lng: number };
-  creatorId: string;
+  creatorId: any;
 }
