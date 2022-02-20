@@ -11,6 +11,17 @@ const app = express();
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
 app.use(bodyParser.json());
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  next();
+});
+
 app.use("/api/places", postsRouter);
 app.use("/api/users", userRouter);
 
@@ -37,7 +48,7 @@ app.use(
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.DB_CRED}:${process.env.DB_CRED}@cluster0.pku1z.mongodb.net/posts?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.DB_CRED}:${process.env.DB_CRED}@cluster0.pku1z.mongodb.net/instasham?retryWrites=true&w=majority`
   )
   .then(() => {
     app.listen(5000);

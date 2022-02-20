@@ -30,19 +30,28 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
     );
   }
   const { username, email, password } = req.body;
-  let existingUser;
+  let existingEmail, existingUsername;
   try {
-    existingUser = await UserModel.findOne({ email: email });
+    existingEmail = await UserModel.findOne({ email: email });
+    existingUsername = await UserModel.findOne({ username: username });
   } catch (err) {
     return next(
       new HttpError("A communication error occured, please try again.", "500")
     );
   }
 
-  if (existingUser) {
+  if (existingEmail) {
     return next(
       new HttpError(
         "A user already exists with that email, please try another email address",
+        "422"
+      )
+    );
+  }
+  if (existingUsername) {
+    return next(
+      new HttpError(
+        "A user already exists with that username, please try another",
         "422"
       )
     );
