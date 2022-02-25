@@ -61,7 +61,8 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
     username,
     email,
     password,
-    image: "https://ibb.co/NNKrbQt",
+    image:
+      "https://images.unsplash.com/photo-1644893000222-e5e762f0c329?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
     places: [],
   });
 
@@ -93,6 +94,9 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   if (existingUser.password !== password) {
     return next(new HttpError("Incorrect Password", "401"));
   } else {
-    res.json({ message: "Logged In" });
+    res.json({
+      message: "Logged In",
+      user: existingUser.toObject({ getters: true }),
+    });
   }
 }

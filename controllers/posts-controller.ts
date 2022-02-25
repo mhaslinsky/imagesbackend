@@ -60,6 +60,7 @@ export async function createPost(
 ) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
+    console.log(error);
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
   }
   const { title, description, creatorId, address } = req.body;
@@ -77,7 +78,7 @@ export async function createPost(
     address,
     coordinates,
     image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1746&q=80",
+      "https://images.unsplash.com/photo-1523730205978-59fd1b2965e3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=908&q=80",
   });
 
   let user;
@@ -100,7 +101,7 @@ export async function createPost(
     );
   }
 
-  res.status(201).json(createdPlace);
+  res.status(201).json(createdPlace.toObject({ getters: true }));
 }
 
 export async function editPost(
