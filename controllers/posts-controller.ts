@@ -29,10 +29,10 @@ export async function getPostsByUserId(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.params.uid;
+  const creatorId = req.params.uid;
   let filteredPosts;
   try {
-    filteredPosts = await PostModel.find({ creatorId: userId });
+    filteredPosts = await PostModel.find({ creatorId });
   } catch (err) {
     return next(
       new HttpError("A communication error occured, please try again.", "500")

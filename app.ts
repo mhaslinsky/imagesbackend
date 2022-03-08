@@ -22,7 +22,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use("/api/places", postsRouter);
+app.use("/api/posts", postsRouter);
 app.use("/api/users", userRouter);
 
 //placing generic route here at bottom of table as a catchall
