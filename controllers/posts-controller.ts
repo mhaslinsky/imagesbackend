@@ -15,13 +15,12 @@ export async function getPostById(
   let filteredPosts;
   try {
     filteredPosts = await PostModel.findById(postId);
+    res.status(200).json(filteredPosts!.toObject({ getters: true }));
   } catch (err) {
     return next(
       new HttpError("Could not find a post for the provided id.", "404")
     );
   }
-
-  res.status(200).json(filteredPosts!.toObject({ getters: true }));
 }
 
 export async function getPostsByUserId(

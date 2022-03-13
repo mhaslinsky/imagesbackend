@@ -1,6 +1,8 @@
 import express from "express";
 import { getUsers, signUp, login } from "../controllers/users-controller";
 import { check } from "express-validator";
+import fileUpload from "../middleware/file-upload";
+
 const userRouter = express.Router();
 
 const signupValidation = [
@@ -10,7 +12,14 @@ const signupValidation = [
 ];
 
 userRouter.get("/", getUsers);
-userRouter.post("/signup", signupValidation, signUp);
+userRouter.post(
+  "/signup",
+  //this tell multer to extract the image from the payload before doing rest of validation
+  //multer needed as json cannot handle binary data (like imgs)
+  fileUpload.single("image"),
+  signupValidation,
+  signUp
+);
 userRouter.post("/login", login);
 
 export default userRouter;

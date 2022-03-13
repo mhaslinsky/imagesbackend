@@ -13,7 +13,7 @@ export default async function getCoordsFromAddress(address: any) {
 
   if (!data || data.status === "ZERO_RESULTS") {
     throw new HttpError(
-      "Could not find coordinates for the specified address",
+      "Could not find the entered address on planet Earth. Please try a different address.",
       "422"
     );
   }
