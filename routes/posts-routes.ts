@@ -7,6 +7,8 @@ import {
   deletePost,
 } from "../controllers/posts-controller";
 import { check } from "express-validator";
+import fileUpload from "../middleware/file-upload";
+
 const postsRouter = express.Router();
 
 const createPostValidation = [
@@ -25,6 +27,11 @@ postsRouter.get("/:pid", getPostById);
 postsRouter.get("/user/:uid", getPostsByUserId);
 postsRouter.patch("/:pid", updatePostValidation, editPost);
 postsRouter.delete("/:pid", deletePost);
-postsRouter.post("/", createPostValidation, createPost);
+postsRouter.post(
+  "/",
+  fileUpload.single("image"),
+  createPostValidation,
+  createPost
+);
 
 export default postsRouter;

@@ -2,6 +2,7 @@ import HttpError from "../models/http-error";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import UserModel from "../models/userSchema";
+import { create } from "domain";
 
 export async function getUsers(req: any, res: any, next: any) {
   let users;
@@ -61,10 +62,11 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
     username,
     email,
     password,
-    image:
-      "https://images.unsplash.com/photo-1644893000222-e5e762f0c329?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
+    image: req.file?.path,
     places: [],
   });
+
+  console.log(createdUser);
 
   try {
     await createdUser.save();
