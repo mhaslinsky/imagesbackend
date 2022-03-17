@@ -5,6 +5,8 @@ import getCoordsFromAddress from "../util/location";
 import PostModel from "../models/postSchema";
 import UserModel from "../models/userSchema";
 import { startSession } from "mongoose";
+import fs from "fs";
+import { GetUserAuthHeader } from "../models/interfaces";
 
 export async function getPostById(
   req: Request,
@@ -104,7 +106,7 @@ export async function createPost(
 }
 
 export async function editPost(
-  req: Request,
+  req: GetUserAuthHeader,
   res: Response,
   next: NextFunction
 ) {
@@ -120,6 +122,10 @@ export async function editPost(
     filteredPost = await PostModel.findById(postId);
   } catch (err) {
     return next(new HttpError("Could not find a matching post ID.", "404"));
+  }
+
+  if (req.userData.userId !== filteredPost?.creatorId.toString()) {
+    return next(new HttpError("This isn't your post!", "401"));
   }
 
   let coordinates;
@@ -156,7 +162,7 @@ export async function editPost(
 }
 
 export async function deletePost(
-  req: Request,
+  req: GetUserAuthHeader,
   res: Response,
   next: NextFunction
 ) {
@@ -176,6 +182,13 @@ export async function deletePost(
   if (!filteredPost) {
     return next(new HttpError("Could not find a matching post ID.", "404"));
   }
+
+  if (filteredPost.creatorId.id !== req.userData.userId) {
+    return next(new HttpError("This isn't your post!", "401"));
+  }
+
+  const imagePath = filteredPost.image;
+
   try {
     const deleteSession = await startSession();
     deleteSession.startTransaction();
@@ -192,6 +205,10 @@ export async function deletePost(
       new HttpError("A communication error occured, please try again.", "500")
     );
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.warn(err);
+  });
 
   res.status(200).json({ message: "deleted post" });
 }

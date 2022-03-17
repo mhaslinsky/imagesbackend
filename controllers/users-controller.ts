@@ -2,9 +2,14 @@ import HttpError from "../models/http-error";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import UserModel from "../models/userSchema";
-import { create } from "domain";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-export async function getUsers(req: any, res: any, next: any) {
+export async function getUsers(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   let users;
   try {
     users = await UserModel.find({}, "-password");
@@ -58,15 +63,22 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
     );
   }
 
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+
   const createdUser = new UserModel({
     username,
     email,
-    password,
+    password: hashedPassword,
     image: req.file?.path,
     places: [],
   });
-
-  console.log(createdUser);
 
   try {
     await createdUser.save();
@@ -75,7 +87,25 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
       new HttpError("A communication error occured, please try again.", "500")
     );
   }
-  res.status(201).json(createdUser.toObject({ getters: true }));
+
+  let token;
+  //no promise, but can still fail
+  try {
+    token = jwt.sign(
+      //id created by mongodb
+      { userId: createdUser.id, email: createdUser.email },
+      `${process.env.SECRETKEY}`,
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    return next(
+      new HttpError("Authentication error, please try again.", "500")
+    );
+  }
+
+  res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token: token });
 }
 
 export async function login(req: Request, res: Response, next: NextFunction) {
@@ -93,12 +123,35 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   if (!existingUser) {
     return next(new HttpError("Could not find a user with that email", "401"));
   }
-  if (existingUser.password !== password) {
-    return next(new HttpError("Incorrect Password", "401"));
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+  if (!isValidPassword) {
+    return next(new HttpError("Incorrect Password", "403"));
   } else {
+    let token;
+    try {
+      token = jwt.sign(
+        { userId: existingUser.id, email: existingUser.email },
+        `${process.env.SECRETKEY}`,
+        { expiresIn: "1h" }
+      );
+      console.log(token);
+    } catch (err) {
+      return next(
+        new HttpError("Authentication error, please try again.", "500")
+      );
+    }
+
     res.json({
-      message: "Logged In",
-      user: existingUser.toObject({ getters: true }),
+      userId: existingUser.id,
+      email: existingUser.email,
+      token: token,
     });
   }
 }

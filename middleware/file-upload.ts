@@ -11,7 +11,7 @@ const MIME_TYPE_MAP = {
 type MimeKey = keyof typeof MIME_TYPE_MAP;
 
 const fileUpload = multer({
-  limits: { fileSize: 5000000 },
+  limits: { fileSize: 10000000 },
   //handles creation and saving of files to storage media
   storage: multer.diskStorage({
     //req sent, file sent, and callback func

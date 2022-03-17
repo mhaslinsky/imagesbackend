@@ -8,6 +8,7 @@ import {
 } from "../controllers/posts-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
+import checkAuth from "../middleware/check-auth";
 
 const postsRouter = express.Router();
 
@@ -22,9 +23,11 @@ const updatePostValidation = [
   check("description").isLength({ min: 5 }),
   check("address").not().isEmpty(),
 ];
-
+//not executing here, just passing pointers
 postsRouter.get("/:pid", getPostById);
 postsRouter.get("/user/:uid", getPostsByUserId);
+//this acts a gate stopping lower routes from being reached without a valid token in the req
+postsRouter.use(checkAuth);
 postsRouter.patch("/:pid", updatePostValidation, editPost);
 postsRouter.delete("/:pid", deletePost);
 postsRouter.post(
