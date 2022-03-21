@@ -141,7 +141,6 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         `${process.env.SECRETKEY}`,
         { expiresIn: "1h" }
       );
-      console.log(token);
     } catch (err) {
       return next(
         new HttpError("Authentication error, please try again.", "500")

@@ -18,7 +18,7 @@ const checkAuth = (
     }
     token = (req.headers.authorization as string).split(" ")[1];
     if (!token) {
-      return next(new HttpError("Auth token missing.", "401"));
+      return next(new HttpError("Not Authorized!", "401"));
     }
 
     const decodedToken: JwtPayload = jwt.verify(
@@ -30,7 +30,6 @@ const checkAuth = (
 
     next();
   } catch (err) {
-    console.log(err);
     //error is header isnt formatted or split correctly, or token missing
     return next(new HttpError("Authorization failed.", "401"));
   }

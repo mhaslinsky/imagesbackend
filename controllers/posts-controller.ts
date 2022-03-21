@@ -55,7 +55,7 @@ export async function getPostsByUserId(
 }
 
 export async function createPost(
-  req: Request,
+  req: GetUserAuthHeader,
   res: Response,
   next: NextFunction
 ) {
@@ -63,7 +63,7 @@ export async function createPost(
   if (!error.isEmpty()) {
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
   }
-  const { title, description, creatorId, address } = req.body;
+  const { title, description, address } = req.body;
   let coordinates;
   try {
     coordinates = await getCoordsFromAddress(address);
@@ -74,7 +74,7 @@ export async function createPost(
   const createdPlace = new PostModel({
     title,
     description,
-    creatorId,
+    creatorId: req.userData.userId,
     address,
     coordinates,
     image: req.file?.path,
@@ -84,7 +84,7 @@ export async function createPost(
 
   let user;
   try {
-    user = await UserModel.findById(creatorId);
+    user = await UserModel.findById(req.userData.userId);
   } catch (err) {
     return next(new HttpError("Could not find user with provided ID", "404"));
   }
