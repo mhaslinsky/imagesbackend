@@ -5,6 +5,7 @@ import {
   createPost,
   editPost,
   deletePost,
+  getFeed,
 } from "../controllers/posts-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
@@ -26,6 +27,7 @@ const updatePostValidation = [
 //not executing here, just passing pointers
 postsRouter.get("/:pid", getPostById);
 postsRouter.get("/user/:uid", getPostsByUserId);
+postsRouter.get("/", getFeed);
 //this acts a gate stopping lower routes from being reached without a valid token in the req
 postsRouter.use(checkAuth);
 postsRouter.patch("/:pid", updatePostValidation, editPost);

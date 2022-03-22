@@ -25,6 +25,20 @@ export async function getUsers(
   );
 }
 
+export async function getUserbyId(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.params.uid;
+  let filteredUser;
+
+  try {
+    filteredUser = await UserModel.findById(userId, "-password -posts -email");
+    res.status(200).json(filteredUser!.toObject({ getters: true }));
+  } catch (err) {}
+}
+
 export async function signUp(req: Request, res: Response, next: NextFunction) {
   const error = validationResult(req);
   if (!error.isEmpty()) {

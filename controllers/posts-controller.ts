@@ -8,6 +8,22 @@ import { startSession } from "mongoose";
 import fs from "fs";
 import { GetUserAuthHeader } from "../models/interfaces";
 
+export async function getFeed(req: Request, res: Response, next: NextFunction) {
+  let feedPosts;
+  try {
+    //50 most recent posts, newest created first
+    feedPosts = await PostModel.find().sort({ createDate: 1 }).limit(50);
+    res.status(200).json(
+      feedPosts.map((p) => {
+        return p.toObject({ getters: true });
+      })
+    );
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Error fetching feed.", "500"));
+  }
+}
+
 export async function getPostById(
   req: Request,
   res: Response,
@@ -77,6 +93,7 @@ export async function createPost(
     creatorId: req.userData.userId,
     address,
     coordinates,
+    createDate: new Date(Date.now()).toISOString(),
     image: req.file?.path,
   });
 
