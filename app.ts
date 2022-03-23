@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import postsRouter from "./routes/posts-routes";
 import HttpError from "./models/http-error";
 import userRouter from "./routes/users-routes";
-import fallBackRouter from "./routes/users-routes";
+import fallBackRouter from "./routes/fallback-routes";
 import mongoose from "mongoose";
 import "dotenv/config";
 import fs from "fs";
