@@ -4,7 +4,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 16.3
+      nodejs: 12
     commands:
       - npm install -g typescript
   pre_build:
