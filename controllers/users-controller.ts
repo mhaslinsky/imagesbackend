@@ -12,7 +12,7 @@ export async function getUsers(
 ) {
   let users;
   try {
-    users = await UserModel.find({}, "-password");
+    users = await UserModel.find({}, "-password -email");
   } catch (err) {
     return next(
       new HttpError("Fetching users failed, please try again.", "500")
