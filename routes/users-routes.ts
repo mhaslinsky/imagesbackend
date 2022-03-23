@@ -7,8 +7,11 @@ import {
 } from "../controllers/users-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
+import { NextFunction, Request, Response } from "express";
+import { resolve } from "dns";
 
 const userRouter = express.Router();
+const fallBackRouter = express.Router();
 
 const signupValidation = [
   check("username").not().isEmpty(),
@@ -27,5 +30,9 @@ userRouter.post(
   signUp
 );
 userRouter.post("/login", login);
+
+fallBackRouter.get("/", (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).json('instaSham API');
+});
 
 export default userRouter;
