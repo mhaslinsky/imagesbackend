@@ -38,7 +38,7 @@ const fileUpload = multer({
   fileFilter: (req, file, cb) => {
     let isValid = !!MIME_TYPE_MAP[file.mimetype as MimeKey];
     let error: Error | null = isValid ? null : new Error("Invalid Filetype");
-    if (file.size > 10000000) {
+    if (file.size > 100000000) {
       isValid = false;
       error = new Error("File size too large. Please keep it below 10mb");
     }
