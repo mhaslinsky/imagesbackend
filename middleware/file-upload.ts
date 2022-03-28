@@ -30,6 +30,7 @@ const fileUpload = multer({
     key: (req, file, cb) => {
       //converts left side of map sent to right side, getting proper extension
       const extension = MIME_TYPE_MAP[file.mimetype as MimeKey];
+      console.log("the extension is: " + extension);
       cb(null, randomUUID() + "." + extension);
     },
   }),

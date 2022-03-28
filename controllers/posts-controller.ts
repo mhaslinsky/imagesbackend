@@ -9,6 +9,7 @@ import fs from "fs";
 import { GetUserAuthHeader } from "../models/interfaces";
 
 export async function getFeed(req: Request, res: Response, next: NextFunction) {
+  console.log("providing feed");
   let feedPosts;
   try {
     //50 most recent posts, newest created first

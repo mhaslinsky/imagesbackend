@@ -40,7 +40,7 @@ export async function getUserbyId(
 }
 
 export async function signUp(req: any, res: Response, next: NextFunction) {
-  console.log("did we make it bros?");
+  console.log(req.file);
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(
