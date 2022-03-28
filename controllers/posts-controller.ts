@@ -71,6 +71,7 @@ export async function getPostsByUserId(
 }
 
 export async function createPost(req: any, res: Response, next: NextFunction) {
+  console.log(req.file);
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));

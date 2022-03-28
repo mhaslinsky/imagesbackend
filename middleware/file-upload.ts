@@ -56,4 +56,17 @@ export default fileUpload;
 //     const extension = MIME_TYPE_MAP[file.mimetype as MimeKey];
 //     cb(null, randomUUID() + "." + extension);
 //   },
+// });
+
+// multerS3({
+//   s3,
+//   bucket: "insta-sham",
+//   metadata: function (req, file, cb) {
+//     cb(null, { fieldName: file.fieldname });
+//   },
+//   key: (req, file, cb) => {
+//     //converts left side of map sent to right side, getting proper extension
+//     const extension = MIME_TYPE_MAP[file.mimetype as MimeKey];
+//     cb(null, randomUUID() + "." + extension);
+//   },
 // })
