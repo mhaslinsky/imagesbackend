@@ -56,8 +56,6 @@ app.use(
       return next(error);
     }
     console.log("ERROR: " + error);
-    console.log("REQUEST: " + req);
-    console.log("RESPONSE: " + res);
     res.status((error.code as unknown as number) || 500);
     res.json({ message: error.message || "An unknown error occured" });
   }
