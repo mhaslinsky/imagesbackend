@@ -14,8 +14,8 @@ const app = express();
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
 app.use(bodyParser.json());
 
-//static serving, just return requested file, dont execute it
-app.use("/uploads/images", express.static(path.join("uploads", "images")));
+// //static serving, just return requested file, dont execute it
+// app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -55,6 +55,9 @@ app.use(
     if (res.headersSent) {
       return next(error);
     }
+    console.log("ERROR: " + error);
+    console.log("REQUEST: " + req);
+    console.log("RESPONSE: " + res);
     res.status((error.code as unknown as number) || 500);
     res.json({ message: error.message || "An unknown error occured" });
   }
