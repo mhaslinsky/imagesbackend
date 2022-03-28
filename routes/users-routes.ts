@@ -20,7 +20,7 @@ userRouter.get("/", getUsers);
 userRouter.get("/:uid", getUserbyId);
 userRouter.post(
   "/signup",
-  //this tell multer to extract the image from the payload before doing rest of validation
+  //this tells multer to extract the image from the payload before doing rest of validation
   //multer needed as json cannot handle binary data (like imgs)
   fileUpload.single("image"),
   signupValidation,

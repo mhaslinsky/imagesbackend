@@ -46,9 +46,11 @@ app.use(
     next: NextFunction
   ) => {
     if (req.file) {
-      fs.unlink(req.file.path, (err) => {
-        console.warn("file deleted");
-      });
+      console.log(req.file);
+      //TODO figure out how to delete from S3 bucket
+      // fs.unlink(req.file.path, (err) => {
+      //   console.warn("file deleted");
+      // });
     }
     if (res.headersSent) {
       return next(error);
@@ -63,7 +65,10 @@ mongoose
     `mongodb+srv://${process.env.DB_CRED}:${process.env.DB_CRED}@cluster0.pku1z.mongodb.net/instasham?retryWrites=true&w=majority`
   )
   .then(() => {
-    app.listen(process.env.PORT || 5000);
+    const port = process.env.PORT || 5000;
+    app.listen(port, () => {
+      console.log(`API running on PORT ${port}`);
+    });
   })
   .catch((error) => {
     console.warn(error);

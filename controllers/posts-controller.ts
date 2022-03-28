@@ -70,11 +70,7 @@ export async function getPostsByUserId(
   );
 }
 
-export async function createPost(
-  req: GetUserAuthHeader,
-  res: Response,
-  next: NextFunction
-) {
+export async function createPost(req: any, res: Response, next: NextFunction) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
@@ -94,10 +90,8 @@ export async function createPost(
     address,
     coordinates,
     createDate: new Date(Date.now()).toISOString(),
-    image: req.file?.path,
+    image: req.file?.location,
   });
-
-  console.log(createdPlace);
 
   let user;
   try {
@@ -223,9 +217,10 @@ export async function deletePost(
     );
   }
 
-  fs.unlink(imagePath, (err) => {
-    console.warn(err);
-  });
+  //TODO figure out how to delete from S3
+  // fs.unlink(imagePath, (err) => {
+  //   console.warn(err);
+  // });
 
   res.status(200).json({ message: "deleted post" });
 }

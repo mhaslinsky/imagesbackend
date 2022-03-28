@@ -39,7 +39,8 @@ export async function getUserbyId(
   } catch (err) {}
 }
 
-export async function signUp(req: Request, res: Response, next: NextFunction) {
+export async function signUp(req: any, res: Response, next: NextFunction) {
+  console.log("did we make it bros?");
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(
@@ -90,7 +91,7 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
     username,
     email,
     password: hashedPassword,
-    image: req.file?.path,
+    image: req.file?.location,
     places: [],
   });
 
