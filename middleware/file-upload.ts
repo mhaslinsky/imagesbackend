@@ -19,7 +19,7 @@ const s3 = new aws.S3({
 });
 
 const fileUpload = multer({
-  limits: { fileSize: 10000000 },
+  // limits: { fileSize: 10000000 },
   //handles creation and saving of files to storage media
   storage: multerS3({
     s3,
@@ -34,15 +34,15 @@ const fileUpload = multer({
       cb(null, randomUUID() + "." + extension);
     },
   }),
-  fileFilter: (req, file, cb) => {
-    const isValid = !!MIME_TYPE_MAP[file.mimetype as MimeKey];
-    let error: Error | null = isValid ? null : new Error("Invalid Filetype");
-    if (error) {
-      cb(error);
-    } else {
-      cb(null, isValid);
-    }
-  },
+  // fileFilter: (req, file, cb) => {
+  //   const isValid = !!MIME_TYPE_MAP[file.mimetype as MimeKey];
+  //   let error: Error | null = isValid ? null : new Error("Invalid Filetype");
+  //   if (error) {
+  //     cb(error);
+  //   } else {
+  //     cb(null, isValid);
+  //   }
+  // },
 });
 
 export default fileUpload;
