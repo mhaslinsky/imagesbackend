@@ -3,7 +3,7 @@ import multerS3 from "multer-s3";
 import { randomUUID } from "crypto";
 import aws from "aws-sdk";
 
-//helps multer figure out what type of file we are working with
+//helps multer figure out what type of file we are working with.
 const MIME_TYPE_MAP = {
   "image/png": "png",
   "image/jpeg": "jpeg",
