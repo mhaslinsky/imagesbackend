@@ -5,11 +5,10 @@ import getCoordsFromAddress from "../util/location";
 import PostModel from "../models/postSchema";
 import UserModel from "../models/userSchema";
 import { startSession } from "mongoose";
-import fs from "fs";
 import { GetUserAuthHeader } from "../models/interfaces";
+import CommentModel from "../models/commentSchema";
 
 export async function getFeed(req: Request, res: Response, next: NextFunction) {
-  console.log("providing feed");
   let feedPosts;
   try {
     //50 most recent posts, newest created first
@@ -20,7 +19,6 @@ export async function getFeed(req: Request, res: Response, next: NextFunction) {
       })
     );
   } catch (err) {
-    console.log(err);
     return next(new HttpError("Error fetching feed.", "500"));
   }
 }
@@ -72,7 +70,6 @@ export async function getPostsByUserId(
 }
 
 export async function createPost(req: any, res: Response, next: NextFunction) {
-  console.log(req.file);
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
@@ -225,4 +222,87 @@ export async function deletePost(
   // });
 
   res.status(200).json({ message: "deleted post" });
+}
+
+export async function createComment(
+  req: GetUserAuthHeader,
+  res: Response,
+  next: NextFunction
+) {
+  console.log("at the comment API endpoint");
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
+  }
+  console.log(req.body);
+  const { comment, postId } = req.body;
+
+  const createdComment = new CommentModel({
+    creatorId: req.userData.userId,
+    createDate: new Date(Date.now()).toISOString(),
+    comment: comment,
+    post: postId,
+  });
+
+  let user;
+  try {
+    user = await UserModel.findById(req.userData.userId);
+    console.log(user);
+  } catch (err) {
+    return next(
+      new HttpError("Could not find your userID, please try again", "404")
+    );
+  }
+
+  let post;
+  try {
+    post = await PostModel.findById(postId);
+    console.log(post);
+  } catch (err) {
+    return next(new HttpError("Could not find that post", "404"));
+  }
+
+  try {
+    const commentSession = await startSession();
+    commentSession.startTransaction();
+    await createdComment.save({ session: commentSession });
+    user!.comments.push(createdComment);
+    await user!.save({ session: commentSession });
+    post!.comments.push(createdComment);
+    await post!.save({ session: commentSession });
+    await commentSession.commitTransaction();
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+
+  res.status(201).json(createdComment.toObject({ getters: true }));
+}
+
+export async function getComments(
+  req: GetUserAuthHeader,
+  res: Response,
+  next: NextFunction
+) {
+  const post = req.params.pid;
+  let comments;
+  try {
+    comments = await CommentModel.find({ post }).populate("creatorId");
+  } catch (err) {
+    console.warn(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+  if (comments.length === 0) {
+    res.status(200).json({ message: null });
+  } else {
+    res.status(200).json(
+      comments.map((p) => {
+        return p.toObject({ getters: true });
+      })
+    );
+  }
 }

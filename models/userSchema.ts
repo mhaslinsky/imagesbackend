@@ -8,6 +8,7 @@ const userSchema = new Schema<UserObj>({
   password: { type: String, required: true, minlength: 6 },
   image: { type: String, required: true },
   posts: [{ type: Schema.Types.ObjectId, required: true, ref: "Post" }],
+  comments: [{ type: Schema.Types.ObjectId, required: true, ref: "Comment" }],
 });
 
 // userSchema.plugin(mongooseUniqueValidator);

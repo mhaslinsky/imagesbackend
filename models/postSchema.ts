@@ -12,6 +12,7 @@ const postSchema = new Schema<PostObj>({
   },
   createDate: { type: Date, required: true },
   creatorId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+  comments: [{ type: Schema.Types.ObjectId, required: true, ref: "Comment" }],
 });
 
 const PostModel = model<PostObj>("Post", postSchema);

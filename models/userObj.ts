@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import CommentObj from "./commentObj";
 import PostObj from "./postObj";
 
 export default interface UserObj {
@@ -8,4 +9,5 @@ export default interface UserObj {
   password: string;
   image?: string;
   posts: Types.DocumentArray<PostObj>;
+  comments: Types.DocumentArray<CommentObj>;
 }
