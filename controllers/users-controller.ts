@@ -107,7 +107,11 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
   try {
     token = jwt.sign(
       //id created by mongodb
-      { userId: createdUser.id, email: createdUser.email },
+      {
+        userId: createdUser.id,
+        username: createdUser.username,
+        email: createdUser.email,
+      },
       `${process.env.SECRETKEY}`,
       { expiresIn: "1h" }
     );
@@ -117,9 +121,12 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
     );
   }
 
-  res
-    .status(201)
-    .json({ userId: createdUser.id, email: createdUser.email, token: token });
+  res.status(201).json({
+    userId: createdUser.id,
+    username: createdUser.username,
+    email: createdUser.email,
+    token: token,
+  });
 }
 
 export async function login(req: Request, res: Response, next: NextFunction) {
@@ -151,7 +158,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     let token;
     try {
       token = jwt.sign(
-        { userId: existingUser.id, email: existingUser.email },
+        {
+          userId: existingUser.id,
+          username: existingUser.username,
+          email: existingUser.email,
+        },
         `${process.env.SECRETKEY}`,
         { expiresIn: "1h" }
       );
@@ -163,6 +174,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     res.json({
       userId: existingUser.id,
+      username: existingUser.username,
       email: existingUser.email,
       token: token,
     });
