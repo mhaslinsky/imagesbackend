@@ -7,8 +7,7 @@ import userRouter from "./routes/users-routes";
 import fallBackRouter from "./routes/fallback-routes";
 import mongoose from "mongoose";
 import "dotenv/config";
-import fs from "fs";
-import path from "path";
+import commentsRouter from "./routes/comments-routes";
 
 const app = express();
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
@@ -30,6 +29,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api/posts", postsRouter);
 app.use("/api/users", userRouter);
+app.use("/comments", commentsRouter);
 app.use("/", fallBackRouter);
 
 //placing generic route here at bottom of table as a catchall

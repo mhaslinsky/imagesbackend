@@ -6,8 +6,6 @@ import {
   editPost,
   deletePost,
   getFeed,
-  createComment,
-  getComments,
 } from "../controllers/posts-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
@@ -33,12 +31,11 @@ const commentValidation = check("comment").not().isEmpty();
 postsRouter.get("/:pid", getPostById);
 postsRouter.get("/user/:uid", getPostsByUserId);
 postsRouter.get("/", getFeed);
-postsRouter.get("/comment/:pid", getComments);
 //this acts a gate stopping lower routes from being reached without a valid token in the req
 postsRouter.use(checkAuth);
 postsRouter.patch("/:pid", updatePostValidation, editPost);
 postsRouter.delete("/:pid", deletePost);
-postsRouter.post("/comment/:pid", commentValidation, createComment);
+
 postsRouter.post(
   "/",
   fileUpload.single("image"),
