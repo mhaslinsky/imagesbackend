@@ -12,12 +12,11 @@ export async function createComment(
   res: Response,
   next: NextFunction
 ) {
-  console.log("at the comment API endpoint");
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return next(new HttpError("Invalid Inputs, Please check inputs", "422"));
   }
-  console.log(req.body);
+
   const { comment, postId } = req.body;
 
   const createdComment = new CommentModel({
@@ -30,7 +29,6 @@ export async function createComment(
   let user;
   try {
     user = await UserModel.findById(req.userData.userId);
-    console.log(user);
   } catch (err) {
     return next(
       new HttpError("Could not find your userID, please try again", "404")
@@ -40,7 +38,6 @@ export async function createComment(
   let post;
   try {
     post = await PostModel.findById(postId);
-    console.log(post);
   } catch (err) {
     return next(new HttpError("Could not find that post", "404"));
   }
@@ -55,7 +52,6 @@ export async function createComment(
     await post!.save({ session: commentSession });
     await commentSession.commitTransaction();
   } catch (err) {
-    console.log(err);
     return next(
       new HttpError("A communication error occured, please try again.", "500")
     );
@@ -95,9 +91,7 @@ export async function deleteComment(
   res: Response,
   next: NextFunction
 ) {
-  console.log(req.body);
   const { commentId } = req.body;
-  console.log(commentId);
   let filteredComment;
   try {
     filteredComment = await CommentModel.findById(commentId)
@@ -118,8 +112,6 @@ export async function deleteComment(
     const deleteSession = await startSession();
     deleteSession.startTransaction();
     await filteredComment.remove({ session: deleteSession });
-    //this is where populate comes into play. it allows us to delete the post from the user collection
-    //in the same session without have to find it with a second search
     filteredComment!.creatorId.comments.pull(filteredComment);
     await filteredComment!.creatorId.save({
       session: deleteSession,
@@ -130,7 +122,7 @@ export async function deleteComment(
     });
     await deleteSession.commitTransaction();
   } catch (err) {
-    console.log(err);
+    console.warn(err);
     return next(
       new HttpError("A communication error occured, please try again.", "500")
     );
