@@ -21,7 +21,7 @@ export async function createComment(
 
   const createdComment = new CommentModel({
     creatorId: req.userData.userId,
-    createDate: new Date(Date.now()).toISOString(),
+    // createDate: new Date(Date.now()).toISOString(),
     comment: comment,
     post: postId,
   });

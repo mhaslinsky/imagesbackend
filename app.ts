@@ -55,6 +55,11 @@ app.use(
     if (res.headersSent) {
       return next(error);
     }
+
+    if (error.code == "LIMIT_FILE_SIZE") {
+      res.status(422);
+      res.json({ message: "File size, too large (Limit 10mb)" });
+    }
     console.log("ERROR: " + error);
     res.status((error.code as unknown as number) || 500);
     res.json({ message: error.message || "An unknown error occured" });

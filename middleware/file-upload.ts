@@ -2,6 +2,7 @@ import multer from "multer";
 import multerS3 from "multer-s3";
 import { randomUUID } from "crypto";
 import aws from "aws-sdk";
+import HttpError from "../models/http-error";
 
 //helps multer figure out what type of file we are working with.
 const MIME_TYPE_MAP = {
@@ -34,13 +35,12 @@ const fileUpload = multer({
       cb(null, randomUUID() + "." + extension);
     },
   }),
+  limits: { fileSize: 10000000 },
   fileFilter: (req, file, cb) => {
     let isValid = !!MIME_TYPE_MAP[file.mimetype as MimeKey];
-    let error: Error | null = isValid ? null : new Error("Invalid Filetype");
-    if (file.size > 100000000) {
-      isValid = false;
-      error = new Error("File size too large. Please keep it below 10mb");
-    }
+    let error: Error | null = isValid
+      ? null
+      : new HttpError("Invalid Filetype", "422");
     if (error) {
       cb(error);
     } else {

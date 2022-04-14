@@ -6,7 +6,6 @@ import PostModel from "../models/postSchema";
 import UserModel from "../models/userSchema";
 import { startSession } from "mongoose";
 import { GetUserAuthHeader } from "../models/interfaces";
-import CommentModel from "../models/commentSchema";
 
 export async function getFeed(req: Request, res: Response, next: NextFunction) {
   let feedPosts;
@@ -88,7 +87,7 @@ export async function createPost(req: any, res: Response, next: NextFunction) {
     creatorId: req.userData.userId,
     address,
     coordinates,
-    createDate: new Date(Date.now()).toISOString(),
+    // createDate: new Date(Date.now()).toISOString(),
     image: req.file?.location,
   });
 
@@ -107,6 +106,7 @@ export async function createPost(req: any, res: Response, next: NextFunction) {
     await user!.save({ session: postSession });
     await postSession.commitTransaction();
   } catch (err) {
+    console.log(err);
     return next(
       new HttpError("A communication error occured, please try again.", "500")
     );

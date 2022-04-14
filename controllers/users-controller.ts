@@ -95,7 +95,7 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
   });
 
   try {
-    await createdUser.save();
+    await createdUser.save({ timestamps: true });
   } catch (err) {
     return next(
       new HttpError("A communication error occured, please try again.", "500")
