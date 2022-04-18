@@ -124,6 +124,7 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
   res.status(201).json({
     userId: createdUser.id,
     username: createdUser.username,
+    avatar: createdUser.image,
     email: createdUser.email,
     token: token,
   });
@@ -175,6 +176,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     res.json({
       userId: existingUser.id,
       username: existingUser.username,
+      avatar: existingUser.image,
       email: existingUser.email,
       token: token,
     });
