@@ -24,3 +24,5 @@ artifacts:
     - package.json
     - package-lock.json
     - node_modules/**/*
+    - .platform//*
+  discard-paths: no
