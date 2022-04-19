@@ -13,16 +13,16 @@ phases:
       - npm install
   build:
     commands:
-      - echo Build started on `date`
+      - echo Build started!!!!
       - npm run build
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo Build completed!!!!
 artifacts:
   files:
     - dist/**/*
     - package.json
     - package-lock.json
     - node_modules/**/*
-    - .platform//*
+    - .platform/*
   discard-paths: no
