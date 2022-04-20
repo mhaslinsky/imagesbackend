@@ -31,7 +31,7 @@ const checkAuth = (
     next();
   } catch (err) {
     //error is header isnt formatted or split correctly, or token missing
-    return next(new HttpError("Authorization failed.", "401"));
+    return next(new HttpError("Authorization failed", "401"));
   }
 };
 
