@@ -17,12 +17,12 @@ phases:
       - npm run build
   post_build:
     commands:
-      - echo Build completed!!!
+      - echo Build completed!!!!
 artifacts:
   files:
     - dist/**/*
     - package.json
     - package-lock.json
     - node_modules/**/*
-    - .platform/**/*
+    - .platform/*
   discard-paths: no
