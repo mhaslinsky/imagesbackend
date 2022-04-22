@@ -5,7 +5,7 @@ try {
   fs.removeSync("./dist");
   console.log("deleting dist folder");
   childProcess.exec("tsc --build tsconfig.json");
-  fs.copySync(`./nginx`, `./current`);
+  fs.copySync(`./nginx`, `./dist`);
 } catch (err) {
   console.log(err);
 }
