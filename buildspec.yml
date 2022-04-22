@@ -13,11 +13,11 @@ phases:
       - npm install
   build:
     commands:
-      - echo Build started!!!!
+      - echo Build started on `date`
       - npm run build
   post_build:
     commands:
-      - echo Build completed!!!!
+      - echo Build completed!!!
 artifacts:
   files:
     - dist/**/*
