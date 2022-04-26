@@ -11,7 +11,7 @@ import fileUpload from "../middleware/file-upload";
 const userRouter = express.Router();
 
 const signupValidation = [
-  check("username").not().isEmpty(),
+  check("username").not().isEmpty().isAlphanumeric(),
   check("email").normalizeEmail().isEmail(),
   check("password").isLength({ min: 6 }),
 ];

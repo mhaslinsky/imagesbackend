@@ -44,28 +44,35 @@ export async function getPostsByUserId(
   res: Response,
   next: NextFunction
 ) {
-  const creatorId = req.params.uid;
-  let filteredPosts;
+  const username = req.params.uid;
+  // const creatorId = req.params.uid;
+
+  let filteredPosts, filteredUser;
   try {
-    filteredPosts = await PostModel.find({ creatorId });
+    filteredUser = await UserModel.findOne({ username }).populate("posts");
+    // filteredPosts = await PostModel.find({ creatorId });
+    console.log(filteredUser);
   } catch (err) {
     return next(
       new HttpError("A communication error occured, please try again.", "500")
     );
   }
-
-  if (filteredPosts.length === 0) {
-    const error: NodeJS.ErrnoException = new HttpError(
-      "Could not find any posts for the provided user.",
-      "404"
+  if (filteredUser) {
+    if (filteredUser.posts.length === 0) {
+      const error: NodeJS.ErrnoException = new HttpError(
+        "Could not find any posts for the provided user.",
+        "404"
+      );
+      return next(error);
+    }
+    res.status(200).json(
+      filteredUser.posts.map((p) => {
+        return p.toObject({ getters: true });
+      })
     );
-    return next(error);
+  } else {
+    return next(new HttpError("User does not exist", "404"));
   }
-  res.status(200).json(
-    filteredPosts.map((p) => {
-      return p.toObject({ getters: true });
-    })
-  );
 }
 
 export async function createPost(req: any, res: Response, next: NextFunction) {

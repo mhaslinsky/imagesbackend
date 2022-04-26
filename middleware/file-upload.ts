@@ -20,9 +20,6 @@ const s3 = new aws.S3({
 });
 
 const fileUpload = multer({
-  //TODO error handling for when file too large
-  // limits: { fileSize: 10000000 },
-  //handles creation and saving of files to storage media
   storage: multerS3({
     s3,
     bucket: "insta-sham",

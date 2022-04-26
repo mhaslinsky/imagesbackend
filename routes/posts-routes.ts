@@ -35,7 +35,6 @@ postsRouter.get("/", getFeed);
 postsRouter.use(checkAuth);
 postsRouter.patch("/:pid", updatePostValidation, editPost);
 postsRouter.delete("/:pid", deletePost);
-
 postsRouter.post(
   "/",
   fileUpload.single("image"),

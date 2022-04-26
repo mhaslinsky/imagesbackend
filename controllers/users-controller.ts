@@ -44,7 +44,7 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
   if (!error.isEmpty()) {
     return next(
       new HttpError(
-        "Invalid account creation credentials, please make sure email is valid and password is at least 6 characters",
+        "Invalid account creation credentials, please make sure username is alphanumeric, email is valid, and password is at least 6 characters",
         "422"
       )
     );
