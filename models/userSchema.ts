@@ -8,6 +8,7 @@ const userSchema = new Schema<UserObj>(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
     image: { type: String, required: true },
+    description: { type: String, required: false },
     posts: [{ type: Schema.Types.ObjectId, required: true, ref: "Post" }],
     comments: [{ type: Schema.Types.ObjectId, required: true, ref: "Comment" }],
   },

@@ -4,9 +4,12 @@ import {
   getUserbyId,
   signUp,
   login,
+  getUserbyName,
+  setDescription,
 } from "../controllers/users-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
+import checkAuth from "../middleware/check-auth";
 
 const userRouter = express.Router();
 
@@ -18,6 +21,7 @@ const signupValidation = [
 
 userRouter.get("/", getUsers);
 userRouter.get("/:uid", getUserbyId);
+userRouter.get("/un/:un", getUserbyName);
 userRouter.post(
   "/signup",
   //this tells multer to extract the image from the payload before doing rest of validation
@@ -27,5 +31,7 @@ userRouter.post(
   signUp
 );
 userRouter.post("/login", login);
+userRouter.use(checkAuth);
+userRouter.patch("/description/:un", setDescription);
 
 export default userRouter;

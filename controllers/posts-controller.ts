@@ -45,13 +45,10 @@ export async function getPostsByUserId(
   next: NextFunction
 ) {
   const username = req.params.uid;
-  // const creatorId = req.params.uid;
 
-  let filteredPosts, filteredUser;
+  let filteredUser;
   try {
     filteredUser = await UserModel.findOne({ username }).populate("posts");
-    // filteredPosts = await PostModel.find({ creatorId });
-    console.log(filteredUser);
   } catch (err) {
     return next(
       new HttpError("A communication error occured, please try again.", "500")

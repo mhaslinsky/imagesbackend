@@ -10,4 +10,5 @@ export default interface UserObj {
   image?: string;
   posts: Types.DocumentArray<PostObj>;
   comments: Types.DocumentArray<CommentObj>;
+  description?: string;
 }

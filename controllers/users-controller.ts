@@ -4,6 +4,7 @@ import { validationResult } from "express-validator";
 import UserModel from "../models/userSchema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { GetUserAuthHeader } from "../models/interfaces";
 
 export async function getUsers(
   req: Request,
@@ -36,7 +37,30 @@ export async function getUserbyId(
   try {
     filteredUser = await UserModel.findById(userId, "-password -posts -email");
     res.status(200).json(filteredUser!.toObject({ getters: true }));
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+}
+
+export async function getUserbyName(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const username = req.params.un;
+  let filteredUser;
+  try {
+    filteredUser = await UserModel.findOne({ username }, "-password -email");
+    res.status(200).json(filteredUser!.toObject({ getters: true }));
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
 }
 
 export async function signUp(req: any, res: Response, next: NextFunction) {
@@ -89,6 +113,7 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
   const createdUser = new UserModel({
     username,
     email,
+    description: null,
     password: hashedPassword,
     image: req.file?.location,
     places: [],
@@ -180,5 +205,22 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       email: existingUser.email,
       token: token,
     });
+  }
+}
+
+export async function setDescription(
+  req: GetUserAuthHeader,
+  res: Response,
+  next: NextFunction
+) {
+  const username = req.params.un;
+  let filteredUser;
+  try {
+    filteredUser = await UserModel.findOne({ username }, "-password -email");
+  } catch (err) {
+    console.log(err);
+  }
+  if (req.userData.userId !== filteredUser?.id.toString()) {
+    return next(new HttpError("This isn't your profile!", "401"));
   }
 }
