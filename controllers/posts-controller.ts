@@ -10,8 +10,14 @@ import { GetUserAuthHeader } from "../models/interfaces";
 export async function getFeed(req: Request, res: Response, next: NextFunction) {
   let feedPosts;
   try {
+    const skip =
+      req.query.skip && /^\d+$/.test(req.query.skip as string)
+        ? Number(req.query.skip)
+        : 0;
     //50 most recent posts, newest created first
-    feedPosts = await PostModel.find().sort({ createDate: 1 }).limit(50);
+    feedPosts = await PostModel.find({}, undefined, { skip, limit: 3 }).sort({
+      createdAt: `desc`,
+    });
     res.status(200).json(
       feedPosts.map((p) => {
         return p.toObject({ getters: true });
