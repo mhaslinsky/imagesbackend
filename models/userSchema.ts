@@ -11,6 +11,7 @@ const userSchema = new Schema<UserObj>(
     description: { type: String, required: false },
     posts: [{ type: Schema.Types.ObjectId, required: true, ref: "Post" }],
     comments: [{ type: Schema.Types.ObjectId, required: true, ref: "Comment" }],
+    verified: { type: Boolean, required: true },
   },
   { timestamps: true }
 );

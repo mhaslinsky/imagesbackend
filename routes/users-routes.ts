@@ -6,6 +6,7 @@ import {
   login,
   getUserbyName,
   setDescription,
+  verifyEmail,
 } from "../controllers/users-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
@@ -22,6 +23,7 @@ const signupValidation = [
 userRouter.get("/", getUsers);
 userRouter.get("/:uid", getUserbyId);
 userRouter.get("/un/:un", getUserbyName);
+userRouter.get("/:uid/verify/:token", verifyEmail);
 userRouter.post(
   "/signup",
   //this tells multer to extract the image from the payload before doing rest of validation

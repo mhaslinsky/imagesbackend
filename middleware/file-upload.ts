@@ -47,28 +47,3 @@ const fileUpload = multer({
 });
 
 export default fileUpload;
-
-// multer.diskStorage({
-//   //req sent, file sent, and callback func
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/images");
-//   },
-//   filename: (req, file, cb) => {
-//     //converts left side of map sent to right side, getting proper extension
-//     const extension = MIME_TYPE_MAP[file.mimetype as MimeKey];
-//     cb(null, randomUUID() + "." + extension);
-//   },
-// });
-
-// multerS3({
-//   s3,
-//   bucket: "insta-sham",
-//   metadata: function (req, file, cb) {
-//     cb(null, { fieldName: file.fieldname });
-//   },
-//   key: (req, file, cb) => {
-//     //converts left side of map sent to right side, getting proper extension
-//     const extension = MIME_TYPE_MAP[file.mimetype as MimeKey];
-//     cb(null, randomUUID() + "." + extension);
-//   },
-// })

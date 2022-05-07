@@ -11,4 +11,5 @@ export default interface UserObj {
   posts: Types.DocumentArray<PostObj>;
   comments: Types.DocumentArray<CommentObj>;
   description?: string;
+  verified: boolean;
 }
