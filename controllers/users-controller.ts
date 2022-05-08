@@ -128,7 +128,7 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
     creatorId: createdUser._id,
     token: crypto.randomBytes(32).toString("hex"),
   });
-  const url = `${process.env.BASE_URL}/api/users/${createdUser._id}/verify/${createdToken.token}`;
+  const url = `${process.env.FE_URL}/verify/${createdUser._id}/${createdToken.token}`;
   try {
     await sendEmail(createdUser.email, "Verification Email", url);
   } catch (err) {
@@ -193,8 +193,41 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     );
   }
 
-  if (!existingUser) {
+  if (!existingUser)
     return next(new HttpError("Could not find a user with that email", "401"));
+  if (!existingUser.verified) {
+    let token = await TokenModel.findOne({ creatorId: existingUser._id });
+    if (!token) {
+      const createdToken = new TokenModel({
+        creatorId: existingUser._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      });
+      const url = `${process.env.FE_URL}/verify/${existingUser._id}/${createdToken.token}`;
+      try {
+        await createdToken.save();
+        await sendEmail(existingUser.email, "Verification Email", url);
+      } catch (err) {
+        console.log(err);
+        return next(
+          new HttpError(
+            "A Communication Error Occured, Please Try Again.",
+            "500"
+          )
+        );
+      }
+      return next(
+        new HttpError(
+          "Account email not verified. Your old verification email has expired. Sending a new one! Please click the link in the email sent by us, check your spam folder if having trouble finding it.",
+          "403"
+        )
+      );
+    }
+    return next(
+      new HttpError(
+        "User account email not verified, check your email account and spam filter for an activation link",
+        "403"
+      )
+    );
   }
   let isValidPassword = false;
   try {
@@ -243,6 +276,9 @@ export async function verifyEmail(
   const sentToken = req.params.token;
   let user: any, token: any;
 
+  console.log(userId);
+  console.log(sentToken);
+
   try {
     user = await UserModel.findById(userId, "-password -posts -email");
     if (!user) return next(new HttpError("Invalid Link", "400"));
@@ -276,7 +312,7 @@ export async function verifyEmail(
     res.status(200).json({ message: "User Account Verified!" });
   } else {
     return next(
-      new HttpError("Verification token and user do not match!", "400")
+      new HttpError("Verification token owner and user do not match!", "400")
     );
   }
 }
