@@ -130,9 +130,17 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
   });
   const url = `${process.env.FE_URL}/verify/${createdUser._id}/${createdToken.token}`;
   try {
-    await sendEmail(createdUser.email, "Verification Email", url);
+    await sendEmail(
+      createdUser.email,
+      "Verification Email",
+      `<div style="font-weight: 400">Thank you for joining <strong style="color: #2b0075">Insta-sham!</strong> To finish signing up, you just need to confirm we've got your correct email address.</div>
+      <div style="font-weight: 900">Please click the following link to confirm your email: <a href="${url}">Click Here!</a></div>`
+    );
   } catch (err) {
     console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
   }
 
   try {
@@ -147,38 +155,10 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
       new HttpError("A communication error occured, please try again.", "500")
     );
   }
-
   res.status(201).send({
     message:
       "An e-mail has been sent to your entered address. Please check for and then follow the validation link.",
   });
-
-  // let token;
-  // //no promise, but can still fail
-  // try {
-  //   token = jwt.sign(
-  //     //id created by mongodb
-  //     {
-  //       userId: createdUser.id,
-  //       username: createdUser.username,
-  //       email: createdUser.email,
-  //     },
-  //     `${process.env.SECRETKEY}`,
-  //     { expiresIn: "1h" }
-  //   );
-  // } catch (err) {
-  //   return next(
-  //     new HttpError("Authentication error, please try again.", "500")
-  //   );
-  // }
-
-  // res.status(201).json({
-  //   userId: createdUser.id,
-  //   username: createdUser.username,
-  //   avatar: createdUser.image,
-  //   email: createdUser.email,
-  //   token: token,
-  // });
 }
 
 export async function login(req: Request, res: Response, next: NextFunction) {
@@ -205,7 +185,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       const url = `${process.env.FE_URL}/verify/${existingUser._id}/${createdToken.token}`;
       try {
         await createdToken.save();
-        await sendEmail(existingUser.email, "Verification Email", url);
+        await sendEmail(
+          existingUser.email,
+          "Verification Email",
+          `Please click the following link to confirm your email: <a href="${url}">Click Here!</a>`
+        );
       } catch (err) {
         console.log(err);
         return next(
@@ -331,5 +315,142 @@ export async function setDescription(
   }
   if (req.userData.userId !== filteredUser?.id.toString()) {
     return next(new HttpError("This isn't your profile!", "401"));
+  }
+}
+
+export async function requestPasswordReset(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  let user;
+  const { email } = req.body;
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return next(
+      new HttpError("Invalid email, please make sure email is valid", "422")
+    );
+  }
+  try {
+    user = await UserModel.findOne({ email });
+    if (!user)
+      return next(new HttpError("No user with that email exists", "401"));
+    if (!user.verified)
+      return next(new HttpError("User account email not verified", "403"));
+  } catch (err) {
+    console.log("error: " + err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+  const createdToken = new TokenModel({
+    creatorId: user._id,
+    token: crypto.randomBytes(32).toString("hex"),
+  });
+
+  const url = `${process.env.FE_URL}/reset/${user._id}/${createdToken.token}`;
+  try {
+    await createdToken.save();
+    await sendEmail(
+      user.email,
+      "Password Reset Email",
+      `<div style="font-weight: 400">A password reset was requested for the <a href="${process.env.FE_URL}">insta-sham</a> account associated with this email address.</div>
+      <div style="font-weight: 400">If this was sent in error, please ignore this message.</div>
+      <div style="font-weight: 900">However if not, please click the following link to confirm ownership of account: <a href="${url}">Click Here!</a></div>`
+    );
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+  res.status(200).json({ message: "Password reset email sent!" });
+}
+
+export async function checkEmailRP(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.params.uid;
+  const sentToken = req.params.token;
+  let user: any, token: any;
+
+  console.log(userId);
+  console.log(sentToken);
+
+  try {
+    user = await UserModel.findById(userId, "-password -posts -email");
+    if (!user) return next(new HttpError("Invalid Link", "400"));
+    token = await TokenModel.findOne({ token: sentToken });
+    if (!token) return next(new HttpError("Invalid Link", "400"));
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+
+  if (String(token!.creatorId) == String(user!._id)) {
+    res.status(200).json({ message: "Please Enter Your New Password" });
+  } else {
+    return next(
+      new HttpError("Verification token owner and user do not match!", "404")
+    );
+  }
+}
+
+export async function resetPass(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return next(
+      new HttpError("Invalid email, please make sure email is valid", "422")
+    );
+  }
+  const userId = req.params.uid;
+  const sentToken = req.params.token;
+  const { password } = req.body;
+  let user: any, token: any;
+
+  try {
+    user = await UserModel.findById(userId, "-password -posts -email");
+    if (!user) return next(new HttpError("Invalid Link", "400"));
+    token = await TokenModel.findOne({ token: sentToken });
+    if (!token) return next(new HttpError("Invalid Link", "400"));
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("A communication error occured, please try again.", "500")
+    );
+  }
+
+  if (String(token!.creatorId) == String(user!._id)) {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const tokenSession = await startSession();
+      tokenSession.startTransaction();
+      await UserModel.updateOne(
+        {
+          _id: user._id,
+        },
+        { password: hashedPassword }
+      ).session(tokenSession);
+      await token.remove({ session: tokenSession });
+      await tokenSession.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      return next(
+        new HttpError("A communication error occured, please try again.", "500")
+      );
+    }
+    res.status(200).json({ message: "Password successfully changed!" });
+  } else {
+    return next(
+      new HttpError("Verification token owner and user do not match!", "404")
+    );
   }
 }

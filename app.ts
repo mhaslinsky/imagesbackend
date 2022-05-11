@@ -13,8 +13,10 @@ const app = express();
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
 app.use(bodyParser.json());
 
-// //static serving, just return requested file, dont execute it
-// app.use("/uploads/images", express.static(path.join("uploads", "images")));
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   console.log(req);
+//   next();
+// });
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -58,7 +60,7 @@ app.use(
 
     if (error.code == "LIMIT_FILE_SIZE") {
       res.status(422);
-      res.json({ message: "File size, too large (Limit 10mb)" });
+      res.json({ message: "File size too large (Please stay below 10mb)" });
     }
     res.status((error.code as unknown as number) || 500);
     res.json({ message: error.message || "An unknown error occured" });

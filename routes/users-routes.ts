@@ -7,6 +7,9 @@ import {
   getUserbyName,
   setDescription,
   verifyEmail,
+  requestPasswordReset,
+  checkEmailRP,
+  resetPass,
 } from "../controllers/users-controller";
 import { check } from "express-validator";
 import fileUpload from "../middleware/file-upload";
@@ -20,10 +23,18 @@ const signupValidation = [
   check("password").isLength({ min: 6 }),
 ];
 
+const pwRestValidation = check("password").isLength({ min: 6 });
+
+const resetValidation = check("email").normalizeEmail().isEmail();
+
 userRouter.get("/", getUsers);
+
 userRouter.get("/:uid", getUserbyId);
 userRouter.get("/un/:un", getUserbyName);
 userRouter.get("/:uid/verify/:token", verifyEmail);
+userRouter.get("/:uid/requestPWR/:token", checkEmailRP);
+userRouter.post("/:uid/resetPass/:token", pwRestValidation, resetPass);
+userRouter.post("/pwreset", resetValidation, requestPasswordReset);
 userRouter.post(
   "/signup",
   //this tells multer to extract the image from the payload before doing rest of validation
