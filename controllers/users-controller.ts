@@ -260,9 +260,6 @@ export async function verifyEmail(
   const sentToken = req.params.token;
   let user: any, token: any;
 
-  console.log(userId);
-  console.log(sentToken);
-
   try {
     user = await UserModel.findById(userId, "-password -posts -email");
     if (!user) return next(new HttpError("Invalid Link", "400"));
@@ -298,23 +295,6 @@ export async function verifyEmail(
     return next(
       new HttpError("Verification token owner and user do not match!", "400")
     );
-  }
-}
-
-export async function setDescription(
-  req: GetUserAuthHeader,
-  res: Response,
-  next: NextFunction
-) {
-  const username = req.params.un;
-  let filteredUser;
-  try {
-    filteredUser = await UserModel.findOne({ username }, "-password -email");
-  } catch (err) {
-    console.log(err);
-  }
-  if (req.userData.userId !== filteredUser?.id.toString()) {
-    return next(new HttpError("This isn't your profile!", "401"));
   }
 }
 
@@ -375,9 +355,6 @@ export async function checkEmailRP(
   const userId = req.params.uid;
   const sentToken = req.params.token;
   let user: any, token: any;
-
-  console.log(userId);
-  console.log(sentToken);
 
   try {
     user = await UserModel.findById(userId, "-password -posts -email");
@@ -452,5 +429,22 @@ export async function resetPass(
     return next(
       new HttpError("Verification token owner and user do not match!", "404")
     );
+  }
+}
+
+export async function setDescription(
+  req: GetUserAuthHeader,
+  res: Response,
+  next: NextFunction
+) {
+  const username = req.params.un;
+  let filteredUser;
+  try {
+    filteredUser = await UserModel.findOne({ username }, "-password -email");
+  } catch (err) {
+    console.log(err);
+  }
+  if (req.userData.userId !== filteredUser?.id.toString()) {
+    return next(new HttpError("This isn't your profile!", "401"));
   }
 }

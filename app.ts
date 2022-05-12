@@ -8,8 +8,13 @@ import fallBackRouter from "./routes/fallback-routes";
 import mongoose from "mongoose";
 import "dotenv/config";
 import commentsRouter from "./routes/comments-routes";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import { ConnectionNS } from "./namespaces/connectionNamespace";
 
 const app = express();
+const httpServer = createServer();
+const io = new Server(httpServer, { cors: { origin: "*" } });
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
 app.use(bodyParser.json());
 
@@ -66,6 +71,12 @@ app.use(
     res.json({ message: error.message || "An unknown error occured" });
   }
 );
+
+io.on("connection", ConnectionNS);
+
+httpServer.listen(4000, () => {
+  console.log("socket.io listening on PORT 4000");
+});
 
 mongoose
   .connect(
