@@ -8,28 +8,15 @@ import fallBackRouter from "./routes/fallback-routes";
 import mongoose from "mongoose";
 import "dotenv/config";
 import commentsRouter from "./routes/comments-routes";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import { ConnectionNS } from "./namespaces/connectionNamespace";
 
 const app = express();
-const httpServer = createServer();
-const io = new Server(httpServer, { cors: { origin: "*" } });
 // parses any incoming data, converts from JSON to regular JS object notation and calls next
 app.use(bodyParser.json());
-
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   console.log(req);
-//   next();
-// });
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
   next();
 });
@@ -45,37 +32,24 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   throw error;
 });
 
-app.use(
-  (
-    error: NodeJS.ErrnoException,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    if (req.file) {
-      console.log(req.file);
-      //TODO figure out how to delete from S3 bucket
-      // fs.unlink(req.file.path, (err) => {
-      //   console.warn("file deleted");
-      // });
-    }
-    if (res.headersSent) {
-      return next(error);
-    }
-
-    if (error.code == "LIMIT_FILE_SIZE") {
-      res.status(422);
-      res.json({ message: "File size too large (Please stay below 10mb)" });
-    }
-    res.status((error.code as unknown as number) || 500);
-    res.json({ message: error.message || "An unknown error occured" });
+app.use((error: NodeJS.ErrnoException, req: Request, res: Response, next: NextFunction) => {
+  if (req.file) {
+    console.log(req.file);
+    //TODO figure out how to delete from S3 bucket
+    // fs.unlink(req.file.path, (err) => {
+    //   console.warn("file deleted");
+    // });
   }
-);
+  if (res.headersSent) {
+    return next(error);
+  }
 
-io.on("connection", ConnectionNS);
-
-httpServer.listen(4000, () => {
-  console.log("socket.io listening on PORT 4000");
+  if (error.code == "LIMIT_FILE_SIZE") {
+    res.status(422);
+    res.json({ message: "File size too large (Please stay below 10mb)" });
+  }
+  res.status((error.code as unknown as number) || 500);
+  res.json({ message: error.message || "An unknown error occured" });
 });
 
 mongoose
