@@ -10,18 +10,12 @@ import sendEmail from "../util/sendEmail";
 import crypto from "crypto";
 import { startSession } from "mongoose";
 
-export async function getUsers(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function getUsers(req: Request, res: Response, next: NextFunction) {
   let users;
   try {
-    users = await UserModel.find({}, "-password -email");
+    users = await UserModel.find({ verified: true }, "-password -email");
   } catch (err) {
-    return next(
-      new HttpError("Fetching users failed, please try again.", "500")
-    );
+    return next(new HttpError("Fetching users failed, please try again.", "500"));
   }
   res.json(
     users.map((u) => {
@@ -30,11 +24,7 @@ export async function getUsers(
   );
 }
 
-export async function getUserbyId(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function getUserbyId(req: Request, res: Response, next: NextFunction) {
   const userId = req.params.uid;
   let filteredUser;
 
@@ -43,17 +33,11 @@ export async function getUserbyId(
     res.status(200).json(filteredUser!.toObject({ getters: true }));
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 }
 
-export async function getUserbyName(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function getUserbyName(req: Request, res: Response, next: NextFunction) {
   const username = req.params.un;
   let filteredUser;
   try {
@@ -61,9 +45,7 @@ export async function getUserbyName(
     res.status(200).json(filteredUser!.toObject({ getters: true }));
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 }
 
@@ -83,35 +65,21 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
     existingEmail = await UserModel.findOne({ email: email });
     existingUsername = await UserModel.findOne({ username: username });
   } catch (err) {
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
   if (existingEmail) {
-    return next(
-      new HttpError(
-        "A user already exists with that email, please try another email address",
-        "422"
-      )
-    );
+    return next(new HttpError("A user already exists with that email, please try another email address", "422"));
   }
   if (existingUsername) {
-    return next(
-      new HttpError(
-        "A user already exists with that username, please try another",
-        "422"
-      )
-    );
+    return next(new HttpError("A user already exists with that username, please try another", "422"));
   }
 
   let hashedPassword;
   try {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
   const createdUser = new UserModel({
@@ -138,9 +106,7 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
     );
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
   try {
@@ -151,13 +117,10 @@ export async function signUp(req: any, res: Response, next: NextFunction) {
     await tokenSession.commitTransaction();
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
   res.status(201).send({
-    message:
-      "An e-mail has been sent to your entered address. Please check for and then follow the validation link.",
+    message: "An e-mail has been sent to your entered address. Please check for and then follow the validation link.",
   });
 }
 
@@ -168,13 +131,10 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     existingUser = await UserModel.findOne({ email: email });
   } catch (err) {
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
-  if (!existingUser)
-    return next(new HttpError("Could not find a user with that email", "401"));
+  if (!existingUser) return next(new HttpError("Could not find a user with that email", "401"));
   if (!existingUser.verified) {
     let token = await TokenModel.findOne({ creatorId: existingUser._id });
     if (!token) {
@@ -192,12 +152,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         );
       } catch (err) {
         console.log(err);
-        return next(
-          new HttpError(
-            "A Communication Error Occured, Please Try Again.",
-            "500"
-          )
-        );
+        return next(new HttpError("A Communication Error Occured, Please Try Again.", "500"));
       }
       return next(
         new HttpError(
@@ -207,19 +162,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       );
     }
     return next(
-      new HttpError(
-        "User account email not verified, check your email account and spam filter for an activation link",
-        "403"
-      )
+      new HttpError("User account email not verified, check your email account and spam filter for an activation link", "403")
     );
   }
   let isValidPassword = false;
   try {
     isValidPassword = await bcrypt.compare(password, existingUser.password);
   } catch (err) {
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
   if (!isValidPassword) {
     return next(new HttpError("Incorrect Password", "403"));
@@ -236,9 +186,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         { expiresIn: "1h" }
       );
     } catch (err) {
-      return next(
-        new HttpError("Authentication error, please try again.", "500")
-      );
+      return next(new HttpError("Authentication error, please try again.", "500"));
     }
 
     res.json({
@@ -251,11 +199,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function verifyEmail(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function verifyEmail(req: Request, res: Response, next: NextFunction) {
   const userId = req.params.uid;
   const sentToken = req.params.token;
   let user: any, token: any;
@@ -267,9 +211,7 @@ export async function verifyEmail(
     if (!token) return next(new HttpError("Invalid Link", "400"));
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
   if (String(token!.creatorId) == String(user!._id)) {
@@ -286,42 +228,28 @@ export async function verifyEmail(
       await tokenSession.commitTransaction();
     } catch (err) {
       console.log(err);
-      return next(
-        new HttpError("A communication error occured, please try again.", "500")
-      );
+      return next(new HttpError("A communication error occured, please try again.", "500"));
     }
     res.status(200).json({ message: "User Account Verified!" });
   } else {
-    return next(
-      new HttpError("Verification token owner and user do not match!", "400")
-    );
+    return next(new HttpError("Verification token owner and user do not match!", "400"));
   }
 }
 
-export async function requestPasswordReset(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function requestPasswordReset(req: Request, res: Response, next: NextFunction) {
   let user;
   const { email } = req.body;
   const error = validationResult(req);
   if (!error.isEmpty()) {
-    return next(
-      new HttpError("Invalid email, please make sure email is valid", "422")
-    );
+    return next(new HttpError("Invalid email, please make sure email is valid", "422"));
   }
   try {
     user = await UserModel.findOne({ email });
-    if (!user)
-      return next(new HttpError("No user with that email exists", "401"));
-    if (!user.verified)
-      return next(new HttpError("User account email not verified", "403"));
+    if (!user) return next(new HttpError("No user with that email exists", "401"));
+    if (!user.verified) return next(new HttpError("User account email not verified", "403"));
   } catch (err) {
     console.log("error: " + err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
   const createdToken = new TokenModel({
     creatorId: user._id,
@@ -340,18 +268,12 @@ export async function requestPasswordReset(
     );
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
   res.status(200).json({ message: "Password reset email sent!" });
 }
 
-export async function checkEmailRP(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function checkEmailRP(req: Request, res: Response, next: NextFunction) {
   const userId = req.params.uid;
   const sentToken = req.params.token;
   let user: any, token: any;
@@ -363,30 +285,20 @@ export async function checkEmailRP(
     if (!token) return next(new HttpError("Invalid Link", "400"));
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
   if (String(token!.creatorId) == String(user!._id)) {
     res.status(200).json({ message: "Please Enter Your New Password" });
   } else {
-    return next(
-      new HttpError("Verification token owner and user do not match!", "404")
-    );
+    return next(new HttpError("Verification token owner and user do not match!", "404"));
   }
 }
 
-export async function resetPass(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function resetPass(req: Request, res: Response, next: NextFunction) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
-    return next(
-      new HttpError("Invalid email, please make sure email is valid", "422")
-    );
+    return next(new HttpError("Invalid email, please make sure email is valid", "422"));
   }
   const userId = req.params.uid;
   const sentToken = req.params.token;
@@ -400,9 +312,7 @@ export async function resetPass(
     if (!token) return next(new HttpError("Invalid Link", "400"));
   } catch (err) {
     console.log(err);
-    return next(
-      new HttpError("A communication error occured, please try again.", "500")
-    );
+    return next(new HttpError("A communication error occured, please try again.", "500"));
   }
 
   if (String(token!.creatorId) == String(user!._id)) {
@@ -420,23 +330,15 @@ export async function resetPass(
       await tokenSession.commitTransaction();
     } catch (err) {
       console.log(err);
-      return next(
-        new HttpError("A communication error occured, please try again.", "500")
-      );
+      return next(new HttpError("A communication error occured, please try again.", "500"));
     }
     res.status(200).json({ message: "Password successfully changed!" });
   } else {
-    return next(
-      new HttpError("Verification token owner and user do not match!", "404")
-    );
+    return next(new HttpError("Verification token owner and user do not match!", "404"));
   }
 }
 
-export async function setDescription(
-  req: GetUserAuthHeader,
-  res: Response,
-  next: NextFunction
-) {
+export async function setDescription(req: GetUserAuthHeader, res: Response, next: NextFunction) {
   const username = req.params.un;
   let filteredUser;
   try {
