@@ -20,7 +20,7 @@ their contributions to web dev as a whole.
 Another element of this project is its backend is hosted using AWS. This isn't my first project
 hosted using a major cloud provider; I have used firebase in the past for smaller case studies. This is my first
 to be integrated into the ecosystem so tightly.
-Details of which services are used can be found below in the [tech stack](##tech-stack) section.
+Details of which services are used can be found below in the [tech stack](#tech-stack) section.
 
 ## Demo
 
