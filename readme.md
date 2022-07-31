@@ -1,4 +1,4 @@
-# Insta-sham
+# Insta-sham (Backend)
 
 This project was my first crack at a CRUD full-stack web application. It utilizes NextJS for the front end,
 Express for the backend, and MongoDB for the database. The MERN stack. This project is expansive and by far the
