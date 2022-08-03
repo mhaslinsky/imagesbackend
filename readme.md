@@ -54,6 +54,7 @@ Nodemailer, UUID, Mongoose, Fs-extra
 - Login with existing user accounts
 - Reset/change password for existing accounts, with proper email authentication
 - Edit description of user accounts, displayed on profile pages
+- Infinite scroll effect on main feed
 - Responsive design, with both mobile and desktop modes
 
 ## Environment Variables

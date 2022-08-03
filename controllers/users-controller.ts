@@ -345,8 +345,21 @@ export async function setDescription(req: GetUserAuthHeader, res: Response, next
     filteredUser = await UserModel.findOne({ username }, "-password -email");
   } catch (err) {
     console.log(err);
+    return next(new HttpError("User Not Found :(", "404"));
   }
   if (req.userData.userId !== filteredUser?.id.toString()) {
     return next(new HttpError("This isn't your profile!", "401"));
   }
+  if (!filteredUser) {
+    return next(new HttpError("User Not Found :(", "404"));
+  }
+  const { description } = req.body;
+  filteredUser.description = description;
+  try {
+    await filteredUser.save();
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("A communication error occured, please try again.", "500"));
+  }
+  res.status(200).json(filteredUser.toObject({ getters: true }));
 }
